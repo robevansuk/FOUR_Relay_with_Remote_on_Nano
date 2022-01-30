@@ -111,12 +111,13 @@ void loop() {
         Serial.println("results.value before update : " + results.value, HEX);
         
         updateState(togglestate, pinAddressMap[results.value]);
-        updateLcdDisplay();
         
         Serial.println("results.value after update: " + results.value , HEX);
         
         irrecv.resume();
     }
+
+    updateLcdDisplay();
 
 }
 
