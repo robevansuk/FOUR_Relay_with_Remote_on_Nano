@@ -117,6 +117,9 @@ void loop() {
         irrecv.resume();
     }
 
+    // CHECK STATE OF BUTTONS FOR HIGH SIGNAL
+    listenToButtons();
+
     updateLcdDisplay();
 
 }
@@ -127,6 +130,10 @@ void toggleOutput() {
   } else {
       outputState = HIGH;
   }
+}
+
+void listenToButtons() {
+  // Check the various pins for button events
 }
 
 void updateState(int currentState, int updatePinColour) {
