@@ -31,9 +31,6 @@ int previousReading            = LOW;       // the previous reading from the inp
 unsigned long lastUpdateTime   = 0;          // the last time the output pin was toggled
 unsigned long debounce         = 200UL;      // the debounce time, increase if the output flickers
 
-// Define integer to remember toggle state
-int togglestate                = 0;
-
 // Define IR Receiver and Results Objects
 IRrecv irrecv(RECV_PIN);
 decode_results results;
@@ -42,10 +39,23 @@ decode_results results;
 LiquidCrystal_I2C lcd(0x27, 16, 4);
 
 const map<int, bool> relayStatusMap;
+relayStatusMap[0] = true;
 relayStatusMap[1] = true;
 relayStatusMap[2] = true;
 relayStatusMap[3] = true;
-relayStatusMap[4] = true;
+
+buttonPins[] = { 5, 6, 7, 8 }; // buttons attach to pins 5, 6, 7 and 8 on the arduino nano diagram corresponding to D2, D3, D4, D5
+
+// I'm not convinced the pin numbers correspond correctly with the diagram.
+const map<int, int> pinAddressMap;
+pinAddressMap[0xA25D807F] = 0; // redPin;    // relay 1
+pinAddressMap[0xA25D40BF] = 1; // yellowPin; // relay 2
+pinAddressMap[0xA25DC03F] = 2; // bluePin;   // relay 3
+pinAddressMap[0xA25D20DF] = 3; // greenPin;  // relay 4
+//pinAddressMap[0xA25DA05F] = pinkPin;   // relay 5
+//pinAddressMap[0xA25D609F] = brownPin;  // relay 6
+//pinAddressMap[0xA25DE01F] = violetPin; // relay 7
+//pinAddressMap[0xA25D10EF] = greyPin;   // relay 8
 
 void setup() {
 
@@ -76,15 +86,6 @@ void setup() {
     lcd.backlight();
 }
 
-const map<int, int> pinAddressMap;
-pinAddressMap[0xA25D807F] = redPin;
-pinAddressMap[0xA25D40BF] = yellowPin;
-pinAddressMap[0xA25DC03F] = bluePin;
-pinAddressMap[0xA25D20DF] = greenPin;
-pinAddressMap[0xA25DA05F] = pinkPin;
-pinAddressMap[0xA25D609F] = brownPin;
-pinAddressMap[0xA25DE01F] = violetPin;
-pinAddressMap[0xA25D10EF] = greyPin;
 
 void loop() {
   
@@ -105,23 +106,26 @@ void loop() {
         previousReading = reading;
     }
 
-    if (irrecv.decode(&results)) {
+    checkIRSignals();
+    checkButtons();
+
+    updateLcdDisplay();
+
+}
+
+void checkIRSignals() {
+   if (irrecv.decode(&results)) {
 
         // Serial Monitor @ 9600 baud
         Serial.println("results.value before update : " + results.value, HEX);
         
-        updateState(togglestate, pinAddressMap[results.value]);
+        int relayId = pinAddressMap[results.value];
+        toggleRelayState(relayId);
         
         Serial.println("results.value after update: " + results.value , HEX);
         
         irrecv.resume();
     }
-
-    // CHECK STATE OF BUTTONS FOR HIGH SIGNAL
-    listenToButtons();
-
-    updateLcdDisplay();
-
 }
 
 void toggleOutput() {
@@ -132,30 +136,38 @@ void toggleOutput() {
   }
 }
 
-void listenToButtons() {
-  // Check the various pins for button events
+void checkButtons() {
+    for (int i = 0; i < sizeof(buttonPins); i++) {
+        // read the state of the pushbutton value:
+        buttonState = digitalRead(buttonPins[i]);
+  
+        // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
+        if (buttonState == HIGH) {
+            toggleRelayState(i);
+        }
+    }
 }
 
-void updateState(int currentState, int updatePinColour) {
-    // Toggle LED On or Off
-    if (currentState == 0) {
-        digitalWrite(updatePinColour, LOW);
-        togglestate = 1;
-    } else {
+void toggleRelayState(int relayId) {
+    // Toggle Relay ON or OFF
+    if (relayStatusMap[relayId] == 0) {
         digitalWrite(updatePinColour, HIGH);
-        togglestate = 0;
+        relayStatusMap[relayId] = 1;
+    } else {
+        digitalWrite(updatePinColour, LOW);
+        relayStatusMap[relayId] = 0;
     }
 }
 
 // This method should update the LCD display to output whatever the current state of the relays is
 void updateLcdDisplay() {
   lcd.clear();
-  lcd.setCursor(0,0); // 0th index, row 0
+  lcd.setCursor(0, 0); // 0th index, row 0
   lcd.print("Relay one - " + relayStatusMap[1]);
-  lcd.setCursor(0,1); // 0th index, row 1
+  lcd.setCursor(0, 1); // 0th index, row 1
   lcd.print("Relay two - " + relayStatusMap[2]);
-  lcd.setCursor(0,2); // 0th index, row 2
+  lcd.setCursor(0, 2); // 0th index, row 2
   lcd.print("Relay three - " + relayStatusMap[3]);
-  lcd.setCursor(0,3); // 0th index, row 3
+  lcd.setCursor(0, 3); // 0th index, row 3
   lcd.print("Relay four - " + relayStatusMap[4]);
 }
