@@ -3,7 +3,6 @@
 #include <IRremote.h>
 #include <std::map>
 
-
 // Define sensor pin
 const int RECV_PIN             = 4;
 
@@ -28,9 +27,7 @@ decode_results results;
 LiquidCrystal_I2C lcd(0x27, 16, 4);
 
 // the following variables are long's because the time, measured in miliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastUpdateTime   = 0;          // the last time the output pin was toggled
-unsigned long debounce         = 200UL;      // the debounce time, increase if the output flickers
-
+//unsigned long debounce         = 200UL;      // the debounce time, increase if the output flickers
 
 //---------------- 
 // mutable state
@@ -57,17 +54,12 @@ pinAddressMap[0xA25D20DF] = 3; // greenPin;  // relay 4
 
 void setup() {
 
-    {
-        pinMode(inPin, INPUT);   // reading / previousReading
-        pinMode(outPin, OUTPUT); // state
-    }
-
     Serial.begin(9600);
-
-    // Enable the IR Receiver
-    irrecv.enableIRIn();
     
-    // Set LED pins as Outputs
+    pinMode(inPin, INPUT);   // reading / previousReading
+    pinMode(outPin, OUTPUT); // state
+    
+    // Set pins as Outputs
     pinMode(redPin, OUTPUT);
     pinMode(yellowPin, OUTPUT);
     pinMode(bluePin, OUTPUT);
@@ -77,28 +69,24 @@ void setup() {
     pinMode(violetPin, OUTPUT);
     pinMode(greyPin, OUTPUT);
 
-    // initialize the LCD
+    // Enable the IR Receiver
+    irrecv.enableIRIn();
+    
+    // initialize LCD
     lcd.begin();
-
-    // Turn on the blacklight and print a message.
     lcd.backlight();
 }
 
-
 void loop() {
-
     checkIRSignals();
     checkButtons();
     updateLcdDisplay();
-
     // add debounce delay here so we prevent the loop being called again for the next however many milliseconds.
-    // delay(150); delayMicroseconds();
-
+    // delay(debounce); // delayMicroseconds(debounce);
 }
 
 void checkIRSignals() {
    if (irrecv.decode(&results)) {
-
         // Serial Monitor @ 9600 baud
         Serial.println("results.value before update : " + results.value, HEX);
         
@@ -113,7 +101,7 @@ void checkIRSignals() {
 
 void checkButtons() {
     for (int i = 0; i < sizeof(buttonPins); i++) {
-        // read the state of the pushbutton value:
+        // read the state of the pushbutton pin:
         buttonState = digitalRead(buttonPins[i]);
   
         // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
