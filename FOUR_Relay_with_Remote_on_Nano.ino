@@ -88,7 +88,10 @@ void setup() {
 
 
 void loop() {
-  
+
+
+  // Not convinced this is necessary - remove this block and just add a delay between invocation + next loop iteration.
+  // vvvv probably unnecessary 
     {
         reading = digitalRead(inPin); // read state from pin
         
@@ -101,15 +104,19 @@ void loop() {
             lastUpdateTime = millis();
         }
 
-        digitalWrite(outPin, outputState); // update state
-
         previousReading = reading;
     }
+    // ^^^ probably unnecessary
+
+
+
 
     checkIRSignals();
     checkButtons();
-
     updateLcdDisplay();
+
+    // add debounce delay here:
+    // delay(150);
 
 }
 
@@ -119,7 +126,7 @@ void checkIRSignals() {
         // Serial Monitor @ 9600 baud
         Serial.println("results.value before update : " + results.value, HEX);
         
-        int relayId = pinAddressMap[results.value];
+        int relayId = pinAddressMap[results.value]; // not entirely sure what these addresses are about but they could be the IR signals corresponding to an input ID.
         toggleRelayState(relayId);
         
         Serial.println("results.value after update: " + results.value , HEX);
@@ -128,6 +135,7 @@ void checkIRSignals() {
     }
 }
 
+// this function doesn't seem necessary.
 void toggleOutput() {
   if (outputState == HIGH) {
       outputState = LOW;
@@ -162,12 +170,8 @@ void toggleRelayState(int relayId) {
 // This method should update the LCD display to output whatever the current state of the relays is
 void updateLcdDisplay() {
   lcd.clear();
-  lcd.setCursor(0, 0); // 0th index, row 0
-  lcd.print("Relay one - " + relayStatusMap[1]);
-  lcd.setCursor(0, 1); // 0th index, row 1
-  lcd.print("Relay two - " + relayStatusMap[2]);
-  lcd.setCursor(0, 2); // 0th index, row 2
-  lcd.print("Relay three - " + relayStatusMap[3]);
-  lcd.setCursor(0, 3); // 0th index, row 3
-  lcd.print("Relay four - " + relayStatusMap[4]);
+  for (int i=0; i<sizeof(relayStatusMap); i++) {
+      lcd.setCursor(0, i); // 0th index, row 0
+      lcd.print("Relay " + i + " - " + relayStatusMap[i]);
+  }
 }
