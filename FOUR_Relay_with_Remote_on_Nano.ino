@@ -95,7 +95,7 @@ void loop() {
     updateLcdDisplay();
 
     // add debounce delay here so we prevent the loop being called again for the next however many milliseconds.
-    // delay(150);
+    // delay(150); delayMicroseconds();
 
 }
 
