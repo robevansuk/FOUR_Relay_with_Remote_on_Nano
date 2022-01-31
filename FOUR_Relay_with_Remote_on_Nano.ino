@@ -35,17 +35,14 @@ unsigned long debounce         = 200UL;      // the debounce time, increase if t
 //---------------- 
 // mutable state
 //----------------
-int outputState                = HIGH;      // the current state of the output pin
-int reading;                                // the current reading from the input pin
-int previousReading            = LOW;       // the previous reading from the input pin  
+
+buttonPins[] = { 5, 6, 7, 8 }; // buttons attach to pins 5, 6, 7 and 8 on the arduino nano diagram corresponding to D2, D3, D4, D5
 
 const map<int, bool> relayStatusMap;
 relayStatusMap[0] = true;
 relayStatusMap[1] = true;
 relayStatusMap[2] = true;
 relayStatusMap[3] = true;
-
-buttonPins[] = { 5, 6, 7, 8 }; // buttons attach to pins 5, 6, 7 and 8 on the arduino nano diagram corresponding to D2, D3, D4, D5
 
 // I'm not convinced the pin numbers correspond correctly with the diagram.
 const map<int, int> pinAddressMap;
