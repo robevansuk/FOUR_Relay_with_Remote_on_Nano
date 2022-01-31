@@ -172,6 +172,7 @@ void updateLcdDisplay() {
   lcd.clear();
   for (int i=0; i<sizeof(relayStatusMap); i++) {
       lcd.setCursor(0, i); // 0th index, row 0
-      lcd.print("Relay " + i + " - " + relayStatusMap[i]);
+      String status = relayStatusMap[i] == 0 ? "ON" : "OFF";
+      lcd.print("Relay " + i + " - " + status);
   }
 }
